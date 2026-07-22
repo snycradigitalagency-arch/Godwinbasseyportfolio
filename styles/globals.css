@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-bg text-text-primary font-body antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display uppercase;
+  }
+
+  ::selection {
+    @apply bg-accent text-white;
+  }
+
+  /* Visible, deliberate focus states — never suppressed */
+  :focus-visible {
+    outline: 2px solid theme("colors.accent");
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .eyebrow {
+    @apply text-xs font-body font-semibold uppercase tracking-eyebrow text-accent;
+  }
+
+  .container-page {
+    @apply mx-auto w-full max-w-[1200px] px-6 md:px-10;
+  }
+}
+
+/* Cursor is only shown on fine-pointer devices; components/motion/Cursor.tsx renders it */
+@media (hover: hover) and (pointer: fine) {
+  body {
+    cursor: none;
+  }
+}

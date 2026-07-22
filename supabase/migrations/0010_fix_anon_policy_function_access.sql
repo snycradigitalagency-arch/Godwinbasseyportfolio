@@ -1,0 +1,11 @@
+-- 0004 revoked anon's EXECUTE on has_editor_role(), intending to stop
+-- direct public RPC calls. But 0005 later added has_editor_role() into
+-- policies that anon evaluates too ("read projects", "read insights":
+-- content_status = 'published' or has_editor_role()) — RLS policy
+-- evaluation requires the querying role to have EXECUTE on any function
+-- the policy calls, so without this grant, anonymous visitors get a
+-- permission error just browsing /projects or /insights. The function
+-- only returns a boolean about the caller's own role, so anon-executable
+-- is low-risk and necessary here — the security advisor will keep
+-- flagging this as expected/intentional, not a bug.
+grant execute on function has_editor_role() to anon;
