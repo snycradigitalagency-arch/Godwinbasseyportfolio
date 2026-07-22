@@ -1,9 +1,11 @@
+"use client";
+
+import { useFormState, useFormStatus } from "react-dom";
 import { getEntityConfig } from "@/lib/admin/entity-configs";
-import { createEntity, updateEntity } from "@/lib/admin/actions";
+import { createEntity, updateEntity, type EntityActionState } from "@/lib/admin/actions";
 
 interface EntityFormProps {
   entitySlug: string;
-  /** Existing row when editing; omit for create */
   initialValues?: Record<string, unknown>;
 }
 
@@ -12,12 +14,15 @@ export function EntityForm({ entitySlug, initialValues }: EntityFormProps) {
   if (!config) return <p className="text-error">Unknown content type.</p>;
 
   const isEditing = Boolean(initialValues?.id);
-  const action = isEditing
+
+  const boundAction = isEditing
     ? updateEntity.bind(null, entitySlug, String(initialValues!.id))
     : createEntity.bind(null, entitySlug);
 
+  const [state, formAction] = useFormState<EntityActionState, FormData>(boundAction, undefined);
+
   return (
-    <form action={action} className="flex max-w-2xl flex-col gap-6">
+    <form action={formAction} className="flex max-w-2xl flex-col gap-6">
       {config.fields.map((field) => {
         const value = initialValues?.[field.key];
 
@@ -71,12 +76,27 @@ export function EntityForm({ entitySlug, initialValues }: EntityFormProps) {
         );
       })}
 
-      <button
-        type="submit"
-        className="mt-2 self-start rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-accent-hover"
-      >
-        {isEditing ? `Save ${config.label}` : `Create ${config.label}`}
-      </button>
+      {state?.error && (
+        <p className="rounded-md border border-error/30 bg-error/5 px-4 py-3 text-sm text-error">
+          {state.error}
+        </p>
+      )}
+
+      <SubmitButton label={isEditing ? `Save ${config.label}` : `Create ${config.label}`} />
     </form>
+  );
+}
+
+function SubmitButton({ label }: { label: string }) {
+  const { pending } = useFormStatus();
+
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="mt-2 self-start rounded-md bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors duration-300 hover:bg-accent-hover disabled:opacity-60"
+    >
+      {pending ? "Saving…" : label}
+    </button>
   );
 }

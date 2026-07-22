@@ -1,29 +1,17 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { requireEditor } from "@/lib/auth/require-role";
+import { revalidatePath } fromimport { createClient } from "@/lib/supabase/server";
+import { requireEditor 
+} from "@/lib/auth/require-role";
 import { getEntityConfig } from "@/lib/admin/entity-configs";
 import { logActivity } from "@/lib/admin/activity";
 
-export type EntityActionState = { error: string } | undefined;
-
-function parseFormValue(raw: FormDataEntryValue | null, type: string) {
-  if (type === "boolean") return raw === "on";
-  if (type === "number") return raw === "" || raw === null ? null : Number(raw);
-  if (type === "tags") {
-    return String(raw ?? "")
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
-  }
-  if (raw === "") return null;
-  return raw;
-}
-
-function buildPayload(entitySlug: string, formData: FormData) {
-  const config = getEntityConfig(entitySlug);
+// NOTE: `config.table` is a runtime string, so Supabase's generated
+// client types (which expect a literal keyof Database["public"]["Tables"])
+// can't validate it statically — `as any` on `.from()` calls below is a
+// deliberate, narrow trade-f for the generic-CRUD pattern, not a type
+// safety gap in the payload itself (each field is still validated against
+// the entity's own fie  const config = getEntityConfig(entitySlug);
   if (!config) throw new Error(`Unknown entity: ${entitySlug}`);
 
   const payload: Record<string, unknown> = {};
@@ -33,11 +21,7 @@ function buildPayload(entitySlug: string, formData: FormData) {
   return { config, payload };
 }
 
-export async function createEntity(
-  entitySlug: string,
-  _prevState: EntityActionState,
-  formData: FormData
-): Promise<EntityActionState> {
+export async function createEntity(entitySlug: string, formData: FormData) {
   const { profile } = await requireEditor();
   const { config, payload } = buildPayload(entitySlug, formData);
 
@@ -53,12 +37,7 @@ export async function createEntity(
   redirect(`/admin/content/${entitySlug}`);
 }
 
-export async function updateEntity(
-  entitySlug: string,
-  id: string,
-  _prevState: EntityActionState,
-  formData: FormData
-): Promise<EntityActionState> {
+export async function updateEntity(entitySlug: string, id: string, formData: FormData) {
   await requireEditor();
   const { config, payload } = buildPayload(entitySlug, formData);
 
@@ -88,3 +67,5 @@ export async function deleteEntity(entitySlug: string, id: string) {
   await logActivity({ action: "delete", targetType: config.table, targetId: id });
   revalidatePath(`/admin/content/${entitySlug}`);
 }
+q
+
