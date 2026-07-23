@@ -1,7 +1,7 @@
-import { createPublicClient } from "@/lib/supabase/public";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getPublishedProjects() {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -13,7 +13,7 @@ export async function getPublishedProjects() {
 }
 
 export async function getFeaturedProjects(limit = 3) {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("projects")
     .select("*")
@@ -27,7 +27,7 @@ export async function getFeaturedProjects(limit = 3) {
 }
 
 export async function getProjectBySlug(slug: string) {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data: project, error } = await supabase
     .from("projects")
     .select("*")
@@ -53,7 +53,7 @@ export async function getProjectBySlug(slug: string) {
 }
 
 export async function getAllProjectSlugs() {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data } = await supabase
     .from("projects")
     .select("slug")

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { createPublicClient } from "@/lib/supabase/public";
+import { createClient } from "@/lib/supabase/server";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://godwinbassey.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
@@ -11,13 +11,20 @@ interface BuildMetadataInput {
   fallbackImage?: string;
 }
 
+/**
+ * Reads the per-page override from `seo_meta` (editable in the admin
+ * under Site → SEO) and falls back to page-supplied defaults when no
+ * override exists. Every public page's generateMetadata should call
+ * this instead of hand-building a Metadata object, so the CMS override
+ * always wins without each page needing its own lookup.
+ */
 export async function buildMetadata({
   pagePath,
   fallbackTitle,
   fallbackDescription,
   fallbackImage,
 }: BuildMetadataInput): Promise<Metadata> {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data: override } = await supabase
     .from("seo_meta")
     .select("meta_title, meta_description, canonical_url, no_index")

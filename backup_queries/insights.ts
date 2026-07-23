@@ -1,7 +1,7 @@
-import { createPublicClient } from "@/lib/supabase/public";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getPublishedInsights() {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("insights")
     .select("*")
@@ -13,7 +13,7 @@ export async function getPublishedInsights() {
 }
 
 export async function getInsightBySlug(slug: string) {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("insights")
     .select("*")
@@ -26,7 +26,7 @@ export async function getInsightBySlug(slug: string) {
 }
 
 export async function getAllInsightSlugs() {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data } = await supabase
     .from("insights")
     .select("slug")

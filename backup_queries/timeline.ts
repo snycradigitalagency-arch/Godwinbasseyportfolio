@@ -1,7 +1,7 @@
-import { createPublicClient } from "@/lib/supabase/public";
+import { createClient } from "@/lib/supabase/server";
 
 export async function getUnifiedTimeline() {
-  const supabase = createPublicClient();
+  const supabase = createClient();
   const { data, error } = await supabase
     .from("unified_timeline")
     .select("*")
