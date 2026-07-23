@@ -1,6 +1,9 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import type { Database } from "@/types/database.types";
 
-export async function getPublishedInsights() {
+type Insight = Database["public"]["Tables"]["insights"]["Row"];
+
+export async function getPublishedInsights(): Promise<Insight[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("insights")
@@ -8,11 +11,11 @@ export async function getPublishedInsights() {
     .eq("content_status", "published")
     .order("published_at", { ascending: false });
 
-  if (error) return [];
-  return data;
+  if (error || !data) return [];
+  return data as Insight[];
 }
 
-export async function getInsightBySlug(slug: string) {
+export async function getInsightBySlug(slug: string): Promise<Insight | null> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("insights")
@@ -21,15 +24,17 @@ export async function getInsightBySlug(slug: string) {
     .eq("content_status", "published")
     .single();
 
-  if (error) return null;
-  return data;
+  if (error || !data) return null;
+  return data as Insight;
 }
 
-export async function getAllInsightSlugs() {
+export async function getAllInsightSlugs(): Promise<Pick<Insight, "slug">[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("insights")
     .select("slug")
     .eq("content_status", "published");
-  return data ?? [];
+
+  if (error || !data) return [];
+  return data as Pick<Insight, "slug">[];
 }

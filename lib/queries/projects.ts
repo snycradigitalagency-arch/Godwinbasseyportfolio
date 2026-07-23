@@ -1,6 +1,11 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import type { Database } from "@/types/database.types";
 
-export async function getPublishedProjects() {
+type Project = Database["public"]["Tables"]["projects"]["Row"];
+type ProjectGallery = Database["public"]["Tables"]["project_gallery"]["Row"];
+type ProjectBeforeAfter = Database["public"]["Tables"]["project_before_after"]["Row"];
+
+export async function getPublishedProjects(): Promise<Project[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("projects")
@@ -8,11 +13,11 @@ export async function getPublishedProjects() {
     .eq("content_status", "published")
     .order("sort_order", { ascending: true });
 
-  if (error) return [];
-  return data;
+  if (error || !data) return [];
+  return data as Project[];
 }
 
-export async function getFeaturedProjects(limit = 3) {
+export async function getFeaturedProjects(limit = 3): Promise<Project[]> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("projects")
@@ -22,11 +27,15 @@ export async function getFeaturedProjects(limit = 3) {
     .order("sort_order", { ascending: true })
     .limit(limit);
 
-  if (error) return [];
-  return data;
+  if (error || !data) return [];
+  return data as Project[];
 }
 
-export async function getProjectBySlug(slug: string) {
+export async function getProjectBySlug(slug: string): Promise<{
+  project: Project;
+  gallery: ProjectGallery[];
+  beforeAfter: ProjectBeforeAfter[];
+} | null> {
   const supabase = createPublicClient();
   const { data: project, error } = await supabase
     .from("projects")
@@ -49,14 +58,20 @@ export async function getProjectBySlug(slug: string) {
       .eq("project_id", project.id),
   ]);
 
-  return { project, gallery: gallery ?? [], beforeAfter: beforeAfter ?? [] };
+  return {
+    project: project as Project,
+    gallery: (gallery ?? []) as ProjectGallery[],
+    beforeAfter: (beforeAfter ?? []) as ProjectBeforeAfter[],
+  };
 }
 
-export async function getAllProjectSlugs() {
+export async function getAllProjectSlugs(): Promise<Pick<Project, "slug">[]> {
   const supabase = createPublicClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("projects")
     .select("slug")
     .eq("content_status", "published");
-  return data ?? [];
+
+  if (error || !data) return [];
+  return data as Pick<Project, "slug">[];
 }

@@ -1,14 +1,17 @@
 import { createPublicClient } from "@/lib/supabase/public";
+import type { Database } from "@/types/database.types";
 
-export async function getSiteSettings() {
+type SiteSettings = Database["public"]["Tables"]["site_settings"]["Row"];
+
+export async function getSiteSettings(): Promise<SiteSettings | null> {
   const supabase = createPublicClient();
   const { data, error } = await supabase
     .from("site_settings")
     .select("*")
     .single();
 
-  if (error) {
+  if (error || !data) {
     return null;
   }
-  return data;
+  return data as SiteSettings;
 }
