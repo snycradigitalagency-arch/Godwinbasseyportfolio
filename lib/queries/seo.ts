@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
+interface SeoOverride {
+  meta_title: string | null;
+  meta_description: string | null;
+  canonical_url: string | null;
+  no_index: boolean;
+}
+
 import { createPublicClient } from "@/lib/supabase/public";
+
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://godwinbassey.com";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/og-default.png`;
@@ -18,11 +26,14 @@ export async function buildMetadata({
   fallbackImage,
 }: BuildMetadataInput): Promise<Metadata> {
   const supabase = createPublicClient();
-  const { data: override } = await supabase
+  const { data: overrideData } = await supabase
     .from("seo_meta")
     .select("meta_title, meta_description, canonical_url, no_index")
     .eq("page_path", pagePath)
     .single();
+
+  const override = overrideData as SeoOverride | null;
+
 
   const title = override?.meta_title || fallbackTitle;
   const description = override?.meta_description || fallbackDescription;

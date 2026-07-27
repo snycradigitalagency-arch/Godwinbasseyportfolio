@@ -37,14 +37,16 @@ export async function getProjectBySlug(slug: string): Promise<{
   beforeAfter: ProjectBeforeAfter[];
 } | null> {
   const supabase = createPublicClient();
-  const { data: project, error } = await supabase
+  const { data: projectData, error } = await supabase
     .from("projects")
     .select("*")
     .eq("slug", slug)
     .eq("content_status", "published")
     .single();
 
-  if (error || !project) return null;
+  if (error || !projectData) return null;
+
+const project = projectData as Project;
 
   const [{ data: gallery }, { data: beforeAfter }] = await Promise.all([
     supabase
